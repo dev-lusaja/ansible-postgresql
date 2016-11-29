@@ -1,0 +1,28 @@
+- name: Download pgdg-centos93-9.3-1.noarch.rpm
+  get_url: url=http://yum.postgresql.org/9.3/redhat/rhel-6-x86_64/pgdg-centos93-9.3-1.noarch.rpm dest=/usr/local/src/pgdg-centos93-9.3-1.noarch.rpm
+
+- name: Instalar pgdg-centos93-9.3-1.noarch.rpm
+  command: chdir=/usr/local/src rpm --replacepkgs -i pgdg-centos93-9.3-1.noarch.rpm
+
+- name: Eliminar pgdg-centos93-9.3-1.noarch.rpm
+  command: chdir=/usr/local/src rm -f pgdg-centos93-9.3-1.noarch.rpm
+
+- name: Instalando postgresql93, postgresql93-server, postgresql93-contrib, postgresql93-devel
+  yum: name={{ item }} state=latest
+  with_items:
+  - postgresql93
+  - postgresql93-server
+  - postgresql93-contrib
+  - postgresql93-devel
+
+- name: Ejecutar postgresql93 initdb
+  command: chdir=/usr/local/src service postgresql-9.3 initdb
+
+- name: Ejecutar chkconfig postgresql-9.3 on
+  command: chdir=/etc/init.d /sbin/chkconfig postgresql-9.3 on
+
+- name: postgresql-9.3 service state
+  service: name=postgresql-9.3 state=started enabled=yes
+
+- name: Symlink a pg_config para poder compilar psycopg2
+  file: src=/usr/pgsql-9.3/bin/pg_config dest=/usr/local/bin/pg_config state=link
